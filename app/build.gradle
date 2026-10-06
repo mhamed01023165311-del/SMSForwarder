@@ -38,6 +38,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     
-    // مكتبة OkHttp الهامة جداً لإرسال البيانات للسيرفر
-    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    // استخدام صيغة متوافقة تماماً مع أحدث إصدارات Gradle
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
 }
