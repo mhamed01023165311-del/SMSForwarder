@@ -4,24 +4,20 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:background="#121212">
+    android:padding="24dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="مستقبل رسائل فودافون كاش"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:text="SMSHub Forwarder"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="15dp"/>
+        android:layout_marginBottom="12dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="التطبيق يعمل الآن في الخلفية وجاهز لالتقاط وتحويل الرسائل تلقائياً للسيرفر."
-        android:textColor="#AAAAAA"
+        android:text="التطبيق يعمل في الخلفية لالتقاط رسائل فودافون كاش وإرسالها بنجاح."
         android:textSize="14sp"
         android:gravity="center"/>
 
