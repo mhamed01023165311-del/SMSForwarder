@@ -29,6 +29,14 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    // إجبار Gradle على حل أي تعارض في النسخ تلقائياً
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.annotation:annotation:1.6.0'
+            force 'androidx.core:core-ktx:1.10.1'
+        }
+    }
 }
 
 dependencies {
