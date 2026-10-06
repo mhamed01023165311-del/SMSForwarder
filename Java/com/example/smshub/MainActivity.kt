@@ -4,7 +4,8 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.TextView
+import android.widget.Button
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -14,7 +15,16 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // طلب صلاحيات قراءة واستلام الرسائل إذا لم تكن مقبولة
+        // التحقق من الصلاحيات وطلبها عند فتح الشاشة
+        checkAndRequestPermissions()
+
+        val btnCheck = findViewById<Button>(R.id.btnCheck)
+        btnCheck.setOnClickListener {
+            checkAndRequestPermissions()
+        }
+    }
+
+    private fun checkAndRequestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -22,6 +32,8 @@ class MainActivity : Activity() {
                 arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS),
                 100
             )
+        } else {
+            Toast.makeText(this, "الصلاحيات مفعلة وجاهز لالتقاط الرسائل", Toast.LENGTH_SHORT).show()
         }
     }
 }
