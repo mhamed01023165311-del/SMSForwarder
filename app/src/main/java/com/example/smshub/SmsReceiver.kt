@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.telephony.SmsMessage
+import android.util.Log
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -15,7 +16,7 @@ class SmsReceiver : BroadcastReceiver() {
         if (intent?.action == "android.provider.Telephony.SMS_RECEIVED" && context != null) {
 
             val prefs = context.getSharedPreferences("SMS_SETTINGS", Context.MODE_PRIVATE)
-            val targetSender = prefs.getString("TARGET_SENDER", "VodafoneCash") ?: ""
+            val savedSender = prefs.getString("TARGET_SENDER", "VF-Cash") ?: "VF-Cash"
 
             val bundle = intent.extras
             if (bundle != null) {
@@ -26,9 +27,14 @@ class SmsReceiver : BroadcastReceiver() {
                         val sender = sms.originatingAddress ?: ""
                         val body = sms.messageBody ?: ""
 
-                        // المطابقة مع المحادثة المختارة من الشاشة
-                        if (targetSender.isNotEmpty() && sender.contains(targetSender, ignoreCase = true)) {
-                            sendToFirebase(sender, body)
+                        Log.d("SMS_HUB", "رسالة واردة من: $sender | النص: $body")
+
+                        // المطابقة مع الشات المحدد أو مرسل فودافون كاش
+                        if (sender.contains(savedSender, ignoreCase = true) || 
+                            sender.contains("VF-Cash", ignoreCase = true) || 
+                            sender.contains("Vodafone", ignoreCase = true)) {
+                            
+                            sendToFirestoreDirect(sender, body)
                         }
                     }
                 }
@@ -36,33 +42,40 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun sendToFirebase(sender: String, message: String) {
+    private fun sendToFirestoreDirect(sender: String, messageBody: String) {
         thread {
             try {
-                val url = URL("https://firestore.googleapis.com/v1/projects/ai-studio-c8716547-cab3-499a-9da6-dc69b8b88d2c/databases/(default)/documents/sms_logs")
+                // الرابط المباشر للمشروع وقاعدة البيانات ومجموعة sms_logs الموضحة بالصورة
+                val firestoreUrl = "https://firestore.googleapis.com/v1/projects/ai-studio-applet-webapp-5d1dc/databases/ai-studio-c8576547-cab3-499a-9da6-dc69b8b88d2c/documents/sms_logs"
+                
+                val url = URL(firestoreUrl)
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; utf-8")
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
                 conn.doOutput = true
 
-                val jsonInputString = """
+                // الحقول بنفس أسماء الكي الإنجليزية المطابقة لقاعدة البيانات
+                val jsonPayload = """
                     {
                       "fields": {
                         "sender_phone": { "stringValue": "$sender" },
-                        "message": { "stringValue": "$message" },
+                        "raw_message": { "stringValue": "${messageBody.replace("\n", " ").replace("\"", "\\\"")}" },
                         "is_used": { "booleanValue": false },
-                        "timestamp": { "integerValue": "${System.currentTimeMillis()}" }
+                        "timestamp": { "stringValue": "${System.currentTimeMillis()}" }
                       }
                     }
                 """.trimIndent()
 
-                OutputStreamWriter(conn.outputStream).use { os ->
-                    os.write(jsonInputString)
+                OutputStreamWriter(conn.outputStream, "UTF-8").use { os ->
+                    os.write(jsonPayload)
                     os.flush()
                 }
-                conn.responseCode
+
+                val responseCode = conn.responseCode
+                Log.d("SMS_HUB", "كود الاستجابة من السيرفر: $responseCode")
+
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("SMS_HUB", "خطأ في الاتصال بالسيرفر", e)
             }
         }
     }
