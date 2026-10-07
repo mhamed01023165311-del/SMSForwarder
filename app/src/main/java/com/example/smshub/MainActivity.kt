@@ -19,7 +19,6 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // طلب الصلاحيات إن لم تكن ممنوحة
         if (checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
             checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(
@@ -35,7 +34,7 @@ class MainActivity : Activity() {
 
         btnSave.setOnClickListener {
             val selectedSender = spSenders.selectedItem?.toString()
-            if (!selectedSender.isNull_orEmpty()) {
+            if (!selectedSender.isNullOrEmpty()) {
                 val prefs = getSharedPreferences("SMS_SETTINGS", Context.MODE_PRIVATE)
                 prefs.edit().putString("TARGET_SENDER", selectedSender).apply()
                 Toast.makeText(this, "تم تحديد الشات: $selectedSender", Toast.LENGTH_SHORT).show()
@@ -54,7 +53,6 @@ class MainActivity : Activity() {
         }
     }
 
-    // جلب قائمة مرسلي الرسائل الحالية من الموبايل بدون تكرار
     private fun loadSmsChats() {
         val sendersList = mutableListOf<String>()
         val uri = Uri.parse("content://sms/inbox")
@@ -64,13 +62,12 @@ class MainActivity : Activity() {
             val addressIndex = it.getColumnIndex("address")
             while (it.moveToNext()) {
                 val address = it.getString(addressIndex)
-                if (!address.isNull_orEmpty() && !sendersList.contains(address)) {
+                if (!address.isNullOrEmpty() && !sendersList.contains(address)) {
                     sendersList.add(address)
                 }
             }
         }
 
-        // إضافة خيار افتراضي إذا كانت القائمة فارغة
         if (sendersList.isEmpty()) {
             sendersList.add("VodafoneCash")
         }
